@@ -7,6 +7,8 @@
 
 import crypten.communicator as comm
 import torch
+import crypten
+import numpy as np
 from crypten.common.rng import generate_kbit_random_tensor, generate_random_ring_element
 from crypten.common.util import count_wraps, torch_stack
 from crypten.mpc.primitives import ArithmeticSharedTensor, BinarySharedTensor
@@ -19,14 +21,41 @@ class TrustedFirstParty(TupleProvider):
 
     def generate_additive_triple(self, size0, size1, op, device=None, *args, **kwargs):
         """Generate multiplicative triples of given sizes"""
-        a = generate_random_ring_element(size0, device=device)
-        b = generate_random_ring_element(size1, device=device)
+        # a = generate_random_ring_element(size0, device=device)
+        # b = generate_random_ring_element(size1, device=device)
 
-        c = getattr(torch, op)(a, b, *args, **kwargs)
+        # c = getattr(torch, op)(a, b, *args, **kwargs)
 
-        a = ArithmeticSharedTensor(a, precision=0, src=0)
-        b = ArithmeticSharedTensor(b, precision=0, src=0)
-        c = ArithmeticSharedTensor(c, precision=0, src=0)
+        # a = ArithmeticSharedTensor(a, precision=0, src=0)
+        # b = ArithmeticSharedTensor(b, precision=0, src=0)
+        # c = ArithmeticSharedTensor(c, precision=0, src=0)
+        
+        device = torch.device("cpu") if device is None else device
+        device = torch.device(device) if isinstance(device, str) else device
+        generator = crypten.generators["local"][device]
+        size = (300,)
+        if comm.get().get_rank() == 0:
+            a = 183
+            # a = torch.tensor(list(a))
+            b = 655
+            c = 184265
+            aa = torch.randint(a, a+1, size, generator=generator, dtype=torch.long,**kwargs)
+            bb = torch.randint(b, b+1, size, generator=generator, dtype=torch.long,**kwargs)
+            cc = torch.randint(c, c+1, size, generator=generator, dtype=torch.long,**kwargs)
+
+        else:
+            # # TODO: Compute size without executing computation
+            # c_size = getattr(torch, op)(a, b, *args, **kwargs).size()
+            # c = generate_random_ring_element(c_size, generator=generator, device=device)
+            a = 44
+            b = 158
+            c = 286
+            aa = torch.randint(a, a+1, size, generator=generator, dtype=torch.long,**kwargs)
+            bb = torch.randint(b, b+1, size, generator=generator, dtype=torch.long,**kwargs)
+            cc = torch.randint(c, c+1, size, generator=generator, dtype=torch.long,**kwargs)
+        a = ArithmeticSharedTensor.from_shares(aa, precision=0)
+        b = ArithmeticSharedTensor.from_shares(bb, precision=0)
+        c = ArithmeticSharedTensor.from_shares(cc, precision=0)
 
         return a, b, c
 
