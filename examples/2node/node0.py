@@ -57,7 +57,7 @@ if __name__ == "__main__":
     role = args.role
     test_list0  = []
     test_list1  = []
-    for i in range(1, 301): 
+    for i in range(1, 10): 
         test_list0.append(i)
         test_list1.append(1)
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     y_enc = crypten.cryptensor(y, src=1)
 
     # z_enc = x_enc * y_enc
-    for j in range(0, 1000):
+    for j in range(0, 1):
         z_enc = x_enc.matmul(y_enc)
     # z_enc = torch.dot(x_enc, y_enc)
     end = time.time()

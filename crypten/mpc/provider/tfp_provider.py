@@ -29,33 +29,33 @@ class TrustedFirstParty(TupleProvider):
         # a = ArithmeticSharedTensor(a, precision=0, src=0)
         # b = ArithmeticSharedTensor(b, precision=0, src=0)
         # c = ArithmeticSharedTensor(c, precision=0, src=0)
-        
+
         device = torch.device("cpu") if device is None else device
         device = torch.device(device) if isinstance(device, str) else device
         generator = crypten.generators["local"][device]
-        size = (300,)
+        size = (size0[0],)
         if comm.get().get_rank() == 0:
-            a = 183
-            # a = torch.tensor(list(a))
-            b = 655
-            c = 184265
-            aa = torch.randint(a, a+1, size, generator=generator, dtype=torch.long,**kwargs)
-            bb = torch.randint(b, b+1, size, generator=generator, dtype=torch.long,**kwargs)
-            cc = torch.randint(c, c+1, size, generator=generator, dtype=torch.long,**kwargs)
-
+            # a = 183
+            # b = 655
+            # c = 184265
+            a = 0
+            b = 1
+            c = 1
         else:
             # # TODO: Compute size without executing computation
             # c_size = getattr(torch, op)(a, b, *args, **kwargs).size()
             # c = generate_random_ring_element(c_size, generator=generator, device=device)
-            a = 44
+            a = 0
             b = 158
             c = 286
-            aa = torch.randint(a, a+1, size, generator=generator, dtype=torch.long,**kwargs)
-            bb = torch.randint(b, b+1, size, generator=generator, dtype=torch.long,**kwargs)
-            cc = torch.randint(c, c+1, size, generator=generator, dtype=torch.long,**kwargs)
+        aa = torch.randint(a, a+1, size, generator=generator, dtype=torch.long,**kwargs)
+        bb = torch.randint(b, b+1, size, generator=generator, dtype=torch.long,**kwargs)
+        cc = torch.randint(c, c+1, size, generator=generator, dtype=torch.long,**kwargs)
         a = ArithmeticSharedTensor.from_shares(aa, precision=0)
         b = ArithmeticSharedTensor.from_shares(bb, precision=0)
         c = ArithmeticSharedTensor.from_shares(cc, precision=0)
+        print("last a = ", a.share)
+        
 
         return a, b, c
 

@@ -62,7 +62,8 @@ def __beaver_protocol(op, x, y, *args, **kwargs):
         f, g, h = provider.generate_additive_triple(
             x.size(), y.size(), op, device=x.device, *args, **kwargs
         )
-
+    
+        
         t = ArithmeticSharedTensor.PRSS(a.size(), device=x.device)
         t_plain_text = t.get_plain_text()
 
@@ -71,17 +72,23 @@ def __beaver_protocol(op, x, y, *args, **kwargs):
         triples_check = t_plain_text * c - h - sigma * f - rho * g - rho * sigma
         triples_check = triples_check.get_plain_text()
 
+        print("enter active security")
+
         if torch.any(triples_check != 0):
             raise ValueError("Beaver Triples verification failed!")
 
     # Vectorized reveal to reduce rounds of communication
     with IgnoreEncodings([a, b, x, y]):
         epsilon, delta = ArithmeticSharedTensor.reveal_batch([x - a, y - b])
+    
+    print("epsilon, delta = ", epsilon, delta)
 
     # z = c + (a * delta) + (epsilon * b) + epsilon * delta
     c._tensor += getattr(torch, op)(epsilon, b._tensor, *args, **kwargs)
     c._tensor += getattr(torch, op)(a._tensor, delta, *args, **kwargs)
     c += getattr(torch, op)(epsilon, delta, *args, **kwargs)
+    d = c.get_plain_text()
+    print("plain c = ", d)
 
     return c
 
