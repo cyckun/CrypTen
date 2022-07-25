@@ -30,6 +30,7 @@ class TrustedThirdParty(TupleProvider):
 
         a = generate_random_ring_element(size0, generator=generator, device=device)
         b = generate_random_ring_element(size1, generator=generator, device=device)
+        
         if comm.get().get_rank() == 0:
             # Request c from TTP
             c = TTPClient.get().ttp_request(

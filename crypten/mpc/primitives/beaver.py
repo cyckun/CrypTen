@@ -48,6 +48,7 @@ def __beaver_protocol(op, x, y, *args, **kwargs):
         raise ValueError(f"x lives on device {x.device} but y on device {y.device}")
 
     provider = crypten.mpc.get_default_provider()
+    # provider.init_beaver()
     a, b, c = provider.generate_additive_triple(
         x.size(), y.size(), op, device=x.device, *args, **kwargs
     )
@@ -81,6 +82,8 @@ def __beaver_protocol(op, x, y, *args, **kwargs):
     with IgnoreEncodings([a, b, x, y]):
         epsilon, delta = ArithmeticSharedTensor.reveal_batch([x - a, y - b])
     
+    print("x, y = ", x, y)
+    print("a, b = ", a, b)
     print("epsilon, delta = ", epsilon, delta)
 
     # z = c + (a * delta) + (epsilon * b) + epsilon * delta

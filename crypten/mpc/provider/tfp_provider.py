@@ -19,8 +19,59 @@ from .provider import TupleProvider
 class TrustedFirstParty(TupleProvider):
     NAME = "TFP"
 
+    def init_beaver(self):
+        file_name = ""
+        if comm.get().get_rank() == 0:
+            file_name = "./alice.csv"
+        else:
+            file_name = "./bob.csv"
+        with open(file_name, 'r') as file:
+                beaver_data = file.readlines()
+        print("beaver data ", beaver_data)
+        return beaver_data
+       
+
     def generate_additive_triple(self, size0, size1, op, device=None, *args, **kwargs):
         """Generate multiplicative triples of given sizes"""
+        beaver_data = self.init_beaver()
+        size = (size0[0],)
+        # if comm.get().get_rank() == 0:
+        #     pass
+        #     a = 183
+        #     b = 655
+        #     c = 184265
+        # else:
+        #     pass
+        #     # # TODO: Compute size without executing computation
+        #     # c_size = getattr(torch, op)(a, b, *args, **kwargs).size()
+        #     # c = generate_random_ring_element(c_size, generator=generator, device=device)
+        #     a = 44
+        #     b = 158
+        #     c = 286
+        print('type data 0', type(beaver_data))
+        print("len = ", len(beaver_data))
+
+        data_split = beaver_data[0].split(',')
+        print("xxllsl", data_split)
+        a = data_split[0]
+        b = data_split[1]
+        c = data_split[2]
+        
+        list_a = []
+        list_b = []
+        list_c = []
+        for i in range(0, size0[0]):
+            list_a.append(int(a))
+            list_b.append(int(b))
+            list_c.append(int(c))
+        aa = torch.tensor(list_a, dtype=torch.long)
+        bb = torch.tensor(list_b)
+        cc = torch.tensor(list_c)
+        a = ArithmeticSharedTensor.from_shares(aa, precision=0)
+        b = ArithmeticSharedTensor.from_shares(bb, precision=0)
+        c = ArithmeticSharedTensor.from_shares(cc, precision=0)
+     
+        ############################################################origin code
         # a = generate_random_ring_element(size0, device=device)
         # b = generate_random_ring_element(size1, device=device)
 
@@ -29,35 +80,10 @@ class TrustedFirstParty(TupleProvider):
         # a = ArithmeticSharedTensor(a, precision=0, src=0)
         # b = ArithmeticSharedTensor(b, precision=0, src=0)
         # c = ArithmeticSharedTensor(c, precision=0, src=0)
-
-        device = torch.device("cpu") if device is None else device
-        device = torch.device(device) if isinstance(device, str) else device
-        generator = crypten.generators["local"][device]
-        size = (size0[0],)
-        if comm.get().get_rank() == 0:
-            # a = 183
-            # b = 655
-            # c = 184265
-            a = 0
-            b = 1
-            c = 1
-        else:
-            # # TODO: Compute size without executing computation
-            # c_size = getattr(torch, op)(a, b, *args, **kwargs).size()
-            # c = generate_random_ring_element(c_size, generator=generator, device=device)
-            a = 0
-            b = 158
-            c = 286
-        aa = torch.randint(a, a+1, size, generator=generator, dtype=torch.long,**kwargs)
-        bb = torch.randint(b, b+1, size, generator=generator, dtype=torch.long,**kwargs)
-        cc = torch.randint(c, c+1, size, generator=generator, dtype=torch.long,**kwargs)
-        a = ArithmeticSharedTensor.from_shares(aa, precision=0)
-        b = ArithmeticSharedTensor.from_shares(bb, precision=0)
-        c = ArithmeticSharedTensor.from_shares(cc, precision=0)
-        print("last a = ", a.share)
-        
+        #############################################################
 
         return a, b, c
+        
 
     def square(self, size, device=None):
         """Generate square double of given size"""

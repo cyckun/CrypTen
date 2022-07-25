@@ -37,7 +37,7 @@ functions:
   # error function configuration:
   erf_iterations: 8
 mpc:
-  active_security: False
+  active_security: True
   provider: "TFP"
   protocol: "beaver"
 nn:
