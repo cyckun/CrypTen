@@ -35,38 +35,22 @@ class TrustedFirstParty(TupleProvider):
         """Generate multiplicative triples of given sizes"""
         beaver_data = self.init_beaver()
         size = (size0[0],)
-        # if comm.get().get_rank() == 0:
-        #     pass
-        #     a = 183
-        #     b = 655
-        #     c = 184265
-        # else:
-        #     pass
-        #     # # TODO: Compute size without executing computation
-        #     # c_size = getattr(torch, op)(a, b, *args, **kwargs).size()
-        #     # c = generate_random_ring_element(c_size, generator=generator, device=device)
-        #     a = 44
-        #     b = 158
-        #     c = 286
-        print('type data 0', type(beaver_data))
-        print("len = ", len(beaver_data))
-
-        data_split = beaver_data[0].split(',')
-        print("xxllsl", data_split)
-        a = data_split[0]
-        b = data_split[1]
-        c = data_split[2]
-        
+   
         list_a = []
         list_b = []
         list_c = []
-        for i in range(0, size0[0]):
+        for count in range(0, size0[0]):
+            data_split = beaver_data[count].split(',')
+            a = data_split[0]
+            b = data_split[1]
+            c = data_split[2]
             list_a.append(int(a))
             list_b.append(int(b))
             list_c.append(int(c))
+
         aa = torch.tensor(list_a, dtype=torch.long)
-        bb = torch.tensor(list_b)
-        cc = torch.tensor(list_c)
+        bb = torch.tensor(list_b, dtype=torch.long)
+        cc = torch.tensor(list_c, dtype=torch.long)
         a = ArithmeticSharedTensor.from_shares(aa, precision=0)
         b = ArithmeticSharedTensor.from_shares(bb, precision=0)
         c = ArithmeticSharedTensor.from_shares(cc, precision=0)
