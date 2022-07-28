@@ -90,7 +90,7 @@ class TrustedFirstParty(TupleProvider):
             c = cipher.decrypt()
             
             for i in range(0, len(c)):
-                if c[i] < 0:
+                if c[i] < 0 and abs(c[i]) > 1000:  # 不科学，需要推导.
                     c[i] = c[i] + 1032193
 
             b  = []

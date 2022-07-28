@@ -63,7 +63,7 @@ def __beaver_protocol(op, x, y, *args, **kwargs):
         f, g, h = provider.generate_additive_triple(
             x.size(), y.size(), op, device=x.device, *args, **kwargs
         )
-    
+        print("f, g, h = ", f, g, h)
         
         t = ArithmeticSharedTensor.PRSS(a.size(), device=x.device)
         t_plain_text = t.get_plain_text()
