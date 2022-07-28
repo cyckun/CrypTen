@@ -63,7 +63,7 @@ def __beaver_protocol(op, x, y, *args, **kwargs):
         f, g, h = provider.generate_additive_triple(
             x.size(), y.size(), op, device=x.device, *args, **kwargs
         )
-        print("f, g, h = ", f, g, h)
+        # print("f, g, h = ", f, g, h)
         
         t = ArithmeticSharedTensor.PRSS(a.size(), device=x.device)
         t_plain_text = t.get_plain_text()
@@ -82,16 +82,11 @@ def __beaver_protocol(op, x, y, *args, **kwargs):
     with IgnoreEncodings([a, b, x, y]):
         epsilon, delta = ArithmeticSharedTensor.reveal_batch([x - a, y - b])
     
-    print("x, y = ", x, y)
-    print("a, b = ", a, b)
-    print("epsilon, delta = ", epsilon, delta)
-
+ 
     # z = c + (a * delta) + (epsilon * b) + epsilon * delta
     c._tensor += getattr(torch, op)(epsilon, b._tensor, *args, **kwargs)
     c._tensor += getattr(torch, op)(a._tensor, delta, *args, **kwargs)
     c += getattr(torch, op)(epsilon, delta, *args, **kwargs)
-    d = c.get_plain_text()
-    print("plain c = ", d)
 
     return c
 

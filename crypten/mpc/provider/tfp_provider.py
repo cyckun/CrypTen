@@ -38,8 +38,7 @@ class TrustedFirstParty(TupleProvider):
     def generate_additive_triple(self, size0, size1, op, device=None, *args, **kwargs):
         """Generate multiplicative triples of given sizes"""
         plain_vector = []
-        width = 10
-        print("size0 = ", size0[0])
+        width = size0[0]
         random_scale = 1000  # = sqrt(plain_modulus)
         # Send forward, receive backward
         # dst = (self.rank + 1) % self.world_size
@@ -59,10 +58,7 @@ class TrustedFirstParty(TupleProvider):
             plain_share0 = []
             plain_share1 = []
             for i in range(0, width):
-                plain_vector.append(
-                    random.randint(2, random_scale))  # alice random generate a; 1000 is associated with plain_modulus
-
-            for i in range(0, width):
+                plain_vector.append(random.randint(2, random_scale))  # alice random generate a; 1000 is associated with plain_modulus
                 plain_share0.append(random.randint(1, plain_vector[i] - 1))  # random select a0, a1 = a - a0;
                 plain_share1.append(plain_vector[i] - plain_share0[i])
             try:
@@ -71,14 +67,7 @@ class TrustedFirstParty(TupleProvider):
             except ValueError as value_err:  # 可以写多个捕获异常
                 return value_err
 
-            a1 = bytes(0)
-            for i in range(0, width):
-                a1 = a1 + plain_share1[i].to_bytes(2, "big",
-                                                signed=False)  # as a1 is always > 256, so should encoding with 2 bytes.
-                # if plain_modules get bigger, 2 should update.
-            print("a1 = ",plain_share1)
-
-            first_package = {"context":context.serialize(), "fa":temp, "a1":a1}
+            first_package = {"context":context.serialize(), "fa":temp, "a1":plain_share1}
             comm.get().send_obj(first_package, 1)
             second_package = {
                 "fb": "",
@@ -93,17 +82,13 @@ class TrustedFirstParty(TupleProvider):
                 if c[i] < 0 and abs(c[i]) > 1000:  # 不科学，需要推导.
                     c[i] = c[i] + 1032193
 
-            b  = []
-            client_share0_bytes = second_package.get("b0")
-            ll = len(client_share0_bytes)
-            for i in range(0, width):
-                 b.append(client_share0_bytes[2 * i] * 256 + client_share0_bytes[2 * i + 1])
-
+           
+            b = second_package.get("b0")
             a = plain_share0
 
-            print("a = ", a)
-            print("b = ", b)
-            print("c = ", c)
+            # print("a = ", a)
+            # print("b = ", b)
+            # print("c = ", c)
 
         else:
             first_package = {
@@ -116,14 +101,6 @@ class TrustedFirstParty(TupleProvider):
             a1 = first_package.get("a1")
             fa = first_package.get("fa")
             context_client = ts.Context.load(first_package.get("context"))
-            server_share1 = []
-            ll = len(a1)
-            print("a1 = ", a1)
-            print(type(a1), ll)
-            for i in range(0, width):
-                server_share1.append(a1[2 * i] * 256 + a1[2 * i + 1]) # a1
-
-            print("a1 got from alice = ", server_share1)
             
             Fa = ts.BFVVector.load(context_client, fa)
 
@@ -138,41 +115,20 @@ class TrustedFirstParty(TupleProvider):
                 b1.append(b[i] - b0[i])
 
             cipher = b * Fa - bob_r  # F(a)*b -r = F(a*b-r), this puzzle me, tenseal wrap it.
-            b00 = bytes(0)
-            for i in range(0, width):
-                b00 = b00 + b0[i].to_bytes(2, "big", signed=False)
-            temp = cipher.serialize()
-
-            second_package = {"fb": temp, "b0": b00}
+            second_package = {"fb": cipher.serialize(), "b0": b0}
             comm.get().send_obj(second_package, dst=src)
-            a = server_share1
+            # a = server_share1
+            a = a1
             b = b1
             c = bob_r
-            print("a = ", a)
-            print("b = ", b)
-            print("c = ", c, type(c[0]))
+            # print("a = ", a)
+            # print("b = ", b)
+            # print("c = ", c, type(c[0]))
 
-        beaver_data = self.init_beaver()
-        size = (size0[0],)
-   
-        list_a = []
-        list_b = []
-        list_c = []
-        for count in range(0, size0[0]):
-            # data_split = beaver_data[count].split(',')
-            # a = data_split[0]
-            # b = data_split[1]
-            # c = data_split[2]
-            # list_a.append(int(a))
-            # list_b.append(int(b))
-            # list_c.append(int(c))
-            list_a.append(a[count])
-            list_b.append(b[count])
-            list_c.append(c[count])
 
-        aa = torch.tensor(list_a, dtype=torch.long)
-        bb = torch.tensor(list_b, dtype=torch.long)
-        cc = torch.tensor(list_c, dtype=torch.long)
+        aa = torch.tensor(a, dtype=torch.long)
+        bb = torch.tensor(b, dtype=torch.long)
+        cc = torch.tensor(c, dtype=torch.long)
         a = ArithmeticSharedTensor.from_shares(aa, precision=0)
         b = ArithmeticSharedTensor.from_shares(bb, precision=0)
         c = ArithmeticSharedTensor.from_shares(cc, precision=0)

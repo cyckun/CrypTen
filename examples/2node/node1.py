@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     test_list0  = []
     test_list1  = []
-    for i in range(1,2): 
+    for i in range(1,10):
         test_list0.append(1)
         test_list1.append(1)
     
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     x_enc = crypten.cryptensor(x, src=0)  # encrypt
     y_enc = crypten.cryptensor(y, src=1)
     #z_enc = x_enc * y_enc
-    for j in range(0, 2000):
+    for j in range(0, 20000):
         z_enc = x_enc.matmul(y_enc)
     # z_enc = torch.dot(x_enc, y_enc)
     z = z_enc.get_plain_text(dst=0)
