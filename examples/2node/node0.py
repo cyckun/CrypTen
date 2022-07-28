@@ -71,7 +71,7 @@ if __name__ == "__main__":
     y_enc = crypten.cryptensor(y, src=1)
 
     # z_enc = x_enc * y_enc
-    for j in range(0, 1):
+    for j in range(0, 20):
         z_enc = x_enc.matmul(y_enc)
     # z_enc = torch.dot(x_enc, y_enc)
     end = time.time()

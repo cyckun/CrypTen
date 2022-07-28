@@ -54,7 +54,7 @@ if __name__ == "__main__":
     x_enc = crypten.cryptensor(x, src=0)  # encrypt
     y_enc = crypten.cryptensor(y, src=1)
     #z_enc = x_enc * y_enc
-    for j in range(0, 1):
+    for j in range(0, 20):
         z_enc = x_enc.matmul(y_enc)
     # z_enc = torch.dot(x_enc, y_enc)
     z = z_enc.get_plain_text(dst=0)
