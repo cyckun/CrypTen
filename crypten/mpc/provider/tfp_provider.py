@@ -23,18 +23,6 @@ from .provider import TupleProvider
 class TrustedFirstParty(TupleProvider):
     NAME = "TFP"
 
-    def init_beaver(self):
-        file_name = ""
-        if comm.get().get_rank() == 0:
-            file_name = "./alice.csv"
-        else:
-            file_name = "./bob.csv"
-        with open(file_name, 'r') as file:
-                beaver_data = file.readlines()
-        print("beaver data ", beaver_data)
-        return beaver_data
-       
-
     def generate_additive_triple(self, size0, size1, op, device=None, *args, **kwargs):
         """Generate multiplicative triples of given sizes"""
         plain_vector = []
